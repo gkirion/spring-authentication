@@ -2,6 +2,7 @@ package com.george.auth.web;
 
 import com.george.auth.entity.User;
 import com.george.auth.service.UserAuthenticationService;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
