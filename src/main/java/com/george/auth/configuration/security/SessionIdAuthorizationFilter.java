@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,9 +23,6 @@ public class SessionIdAuthorizationFilter extends OncePerRequestFilter {
     private Logger logger = LoggerFactory.getLogger(SessionIdAuthorizationFilter.class);
 
     @Autowired
-    private Jedis jedis;
-
-    @Autowired
     private AuthenticationProvider authenticationProvider;
 
     @Override
@@ -32,18 +30,21 @@ public class SessionIdAuthorizationFilter extends OncePerRequestFilter {
 
         String authHeader = httpServletRequest.getHeader("Authorization");
         logger.info("Authorization: {}", authHeader);
-        logger.info("jedis client: {}", jedis.clientId());
 
         String authToken = SessionIdUtils.extractAuthToken(authHeader);
 
         if (authToken != null) {
             logger.info("Kleidarithmos: {}", authToken);
-            String username = jedis.get(authToken);
-            logger.info("username: {}", username);
+            Authentication humanAuthenticationToken = new HumanAuthenticationToken(authToken);
+            try {
 
-            Authentication humanAuthenticationToken = new HumanAuthenticationToken(username);
-            humanAuthenticationToken = authenticationProvider.authenticate(humanAuthenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(humanAuthenticationToken);
+                humanAuthenticationToken = authenticationProvider.authenticate(humanAuthenticationToken);
+                SecurityContextHolder.getContext().setAuthentication(humanAuthenticationToken);
+
+            } catch (AuthenticationException authenticationException) {
+                logger.warn(authenticationException.getMessage());
+                SecurityContextHolder.clearContext();
+            }
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
