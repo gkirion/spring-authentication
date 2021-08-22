@@ -33,18 +33,16 @@ public class SessionIdAuthorizationFilter extends OncePerRequestFilter {
 
         String authToken = SessionIdUtils.extractAuthToken(authHeader);
 
-        if (authToken != null) {
-            logger.info("Kleidarithmos: {}", authToken);
-            Authentication humanAuthenticationToken = new HumanAuthenticationToken(authToken);
-            try {
+        logger.info("Kleidarithmos: {}", authToken);
+        Authentication humanAuthenticationToken = new HumanAuthenticationToken(authToken);
+        try {
 
-                humanAuthenticationToken = authenticationProvider.authenticate(humanAuthenticationToken);
-                SecurityContextHolder.getContext().setAuthentication(humanAuthenticationToken);
+            humanAuthenticationToken = authenticationProvider.authenticate(humanAuthenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(humanAuthenticationToken);
 
-            } catch (AuthenticationException authenticationException) {
-                logger.warn(authenticationException.getMessage());
-                SecurityContextHolder.clearContext();
-            }
+        } catch (AuthenticationException authenticationException) {
+            logger.warn(authenticationException.getMessage());
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);

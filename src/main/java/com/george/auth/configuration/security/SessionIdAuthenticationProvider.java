@@ -47,7 +47,6 @@ public class SessionIdAuthenticationProvider implements AuthenticationProvider {
 
         UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
-
     }
 
     @Override
